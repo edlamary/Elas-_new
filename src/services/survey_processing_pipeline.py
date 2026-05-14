@@ -7,13 +7,13 @@ class SurveyProcessingPipeline:
     def __init__(
         self,
         source: SpreadsheetSource,
-        extractor: BaseSpreadsheetExtractor
+        survey_extractor: BaseSpreadsheetExtractor
     ):
         self._source = source
-        self._extractor = extractor
+        self._survey_extractor = survey_extractor
 
     def execute(self):
         path = self._source.fetch()
-        df = self._extractor.extract(path)
+        df = self._survey_extractor.extract(path)
 
         return df

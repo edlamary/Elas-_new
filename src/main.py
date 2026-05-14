@@ -14,4 +14,4 @@ def main():
 
 if __name__ == "__main__":
     survey_path = BASE_DIR / "data" / "Formulário de feeback oficina (respostas).xlsx"
-    SurveyProcessingPipeline(source=LocalSpreadsheetSource(path=survey_path), extractor=SurveyExtractor()).execute()
+    SurveyProcessingPipeline(source=LocalSpreadsheetSource(path=survey_path), survey_extractor=SurveyExtractor()).execute()
