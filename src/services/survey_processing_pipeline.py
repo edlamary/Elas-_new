@@ -1,13 +1,13 @@
 from interfaces.spreadsheet_source import SpreadsheetSource
-from services.spreadsheet_extractor import SpreadsheetExtractor
+from services.base_spreadsheet_extractor import BaseSpreadsheetExtractor
 
 
-class SpreadsheetPipeline:
+class SurveyProcessingPipeline:
 
     def __init__(
         self,
         source: SpreadsheetSource,
-        extractor: SpreadsheetExtractor
+        extractor: BaseSpreadsheetExtractor
     ):
         self._source = source
         self._extractor = extractor

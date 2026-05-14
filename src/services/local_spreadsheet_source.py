@@ -2,5 +2,8 @@ from pathlib import Path
 
 
 class LocalSpreadsheetSource:
+    def __init__(self, path: Path):
+        self._path = path
+
     def fetch(self) -> Path:
-        return Path(r"C:\TI\Codes\ellas\src\data\Formulário de feeback oficina (respostas).xlsx")
+        return self._path

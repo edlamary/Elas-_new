@@ -1,15 +1,13 @@
 from pathlib import Path
 import pandas as pd
+from services.base_spreadsheet_extractor import BaseSpreadsheetExtractor
 
-from utils import normalize_columns
-
-class SpreadsheetExtractor:
+class SurveyExtractor(BaseSpreadsheetExtractor):
   def __init__(self) -> None:
     ...
   
   def extract(self, path:Path) -> pd.DataFrame:
-    df: pd.DataFrame = pd.read_excel(path)
-    df = normalize_columns(df)
+    df = super().extract(path)
 
 
     df["carimbo_de_datahora"] = pd.to_datetime(
