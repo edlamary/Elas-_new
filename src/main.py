@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from services.excel_reader import ExcelReader
 from services.local_spreadsheet_source import LocalSpreadsheetSource
 from services.survey_extractor import SurveyExtractor
 from services.survey_processing_pipeline import SurveyProcessingPipeline
@@ -14,4 +15,4 @@ def main():
 
 if __name__ == "__main__":
     survey_path = BASE_DIR / "data" / "Formulário de feeback oficina (respostas).xlsx"
-    SurveyProcessingPipeline(source=LocalSpreadsheetSource(path=survey_path), survey_extractor=SurveyExtractor()).execute()
+    SurveyProcessingPipeline(source=LocalSpreadsheetSource(path=survey_path), survey_extractor=SurveyExtractor(ExcelReader())).execute()

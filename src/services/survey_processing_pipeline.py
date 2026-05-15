@@ -1,5 +1,5 @@
 from interfaces.spreadsheet_source import SpreadsheetSource
-from services.base_spreadsheet_extractor import BaseSpreadsheetExtractor
+from services.survey_extractor import SurveyExtractor
 
 
 class SurveyProcessingPipeline:
@@ -7,7 +7,7 @@ class SurveyProcessingPipeline:
     def __init__(
         self,
         source: SpreadsheetSource,
-        survey_extractor: BaseSpreadsheetExtractor
+        survey_extractor: SurveyExtractor
     ):
         self._source = source
         self._survey_extractor = survey_extractor

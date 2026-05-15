@@ -1,13 +1,14 @@
 from pathlib import Path
 import pandas as pd
-from services.base_spreadsheet_extractor import BaseSpreadsheetExtractor
 
-class SurveyExtractor(BaseSpreadsheetExtractor):
-  def __init__(self) -> None:
-    ...
+from services.excel_reader import ExcelReader
+
+class SurveyExtractor:
+  def __init__(self, reader: ExcelReader):
+      self._reader = reader
   
   def extract(self, path:Path) -> pd.DataFrame:
-    df = super().extract(path)
+    df = self._reader.read_all(path)["Respostas ao formulário 1"]
 
 
     df["carimbo_de_datahora"] = pd.to_datetime(
@@ -34,7 +35,7 @@ class SurveyExtractor(BaseSpreadsheetExtractor):
     "em_uma_escala_de_0_a_10_o_quanto_voce_recomendaria_esta_oficina_a_uma_amiga_interessada_em_stem": int,
     })
     
-    debug_path = Path("src/debug/raw_df.xlsx")
+    debug_path = Path("src/debug/raw_df_survey.xlsx")
     df.to_excel(debug_path, index=False)
         
     return df
