@@ -9,3 +9,6 @@ class SchoolExtractor:
   def extract(self, path:Path):
     sheets = self._reader.read_all(path)
     print(sheets)
+    for i, sheet in sheets.items():
+      print(f"\n--- Sheet {i} ---")
+      print(sheet.head(5))
