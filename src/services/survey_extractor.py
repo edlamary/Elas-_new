@@ -5,9 +5,9 @@ from services.excel_reader import ExcelReader
 
 class SurveyExtractor:
   def __init__(self, reader: ExcelReader):
-      self._reader = reader
+      self._reader: ExcelReader = reader
   
-  def extract(self, path:Path) -> pd.DataFrame:
+  def extract(self, path:Path):
     df = self._reader.read_all(path)["Respostas ao formulário 1"]
 
 
