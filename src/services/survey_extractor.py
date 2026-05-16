@@ -1,7 +1,8 @@
 from pathlib import Path
 import pandas as pd
-
 from services.excel_reader import ExcelReader
+from utils import save_debug_dataframe
+
 
 class SurveyExtractor:
   def __init__(self, reader: ExcelReader):
@@ -9,7 +10,6 @@ class SurveyExtractor:
   
   def extract(self, path:Path):
     df = self._reader.read_all(path)["Respostas ao formulário 1"]
-
 
     df["carimbo_de_datahora"] = pd.to_datetime(
             df["carimbo_de_datahora"]
@@ -36,6 +36,6 @@ class SurveyExtractor:
     })
     
     debug_path = Path("src/debug/raw_df_survey.xlsx")
-    df.to_excel(debug_path, index=False)
+    save_debug_dataframe(df=df, output_path=debug_path)
         
     return df
