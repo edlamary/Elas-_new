@@ -26,7 +26,7 @@ class SurveyProcessingPipeline:
         path = self._source.fetch()
         survey_df = self._survey_extractor.extract(path)
         survey_df, grouped_programs_df = self._survey_transformer.transform(survey_df)
-        self._schema_maker.mount(df_survey=survey_df, grouped_programs_df=grouped_programs_df)
+        self._schema_maker.mount(df_survey=survey_df, df_fact_event_summary=grouped_programs_df)
     
     
     def _clean_database(self):

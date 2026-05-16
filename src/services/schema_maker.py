@@ -80,7 +80,7 @@ class SchemaMaker:
         df_fact = df_fact.rename(columns={
             "crescimento_interesse_percentual": "crescimento_de_interesse",
         })
-        df_fact = self._generate_sk(df_fact_event_summary, "sk_fato_atividade")
+        df_fact = self._generate_sk(df_fact, "sk_fato_atividade")
         df_fact_event_summary["sk_tempo"] = pd.to_datetime(df_fact_event_summary["data"]).dt.strftime("%Y%m%d").astype(int)
         
         dim_event = df_fact_event_summary.copy()
@@ -89,7 +89,7 @@ class SchemaMaker:
         df_fact_event_summary = df_fact_event_summary.drop(columns=["data", "tema","tipo_de_acao"], errors="ignore")
         df_fact_event_summary = df_fact_event_summary.reset_index(drop=True)
         df_fact_event_summary["sk_fato_evento_resumo"] = df_fact_event_summary.index + 1
-
+        print(df_fact.columns)
         df_fact.drop(columns=[
             'datahora', 'idade', 'ano_ensino_medio', 'relevancia_temas',
         'aplicabilidade_conhecimento', 'nps_oficina','interesse_stem_depois', 'data','coeficiente_de_qualidade_categorizado'
