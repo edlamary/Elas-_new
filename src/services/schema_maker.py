@@ -91,8 +91,7 @@ class SchemaMaker:
         df_fact_event_summary["sk_fato_evento_resumo"] = df_fact_event_summary.index + 1
 
         df_fact.drop(columns=[
-            'datahora', 'idade', 'ano_ensino_medio', 'relevancia_temas',
-        'aplicabilidade_conhecimento', 'nps_oficina','interesse_stem_depois', 'data','coeficiente_de_qualidade_categorizado'
+            'datahora', 'idade', 'ano_ensino_medio', 'nps_oficina', 'data','coeficiente_de_qualidade_categorizado'
         ], inplace=True)
         dim_time.drop(columns=["data"], inplace=True)
         

@@ -22,6 +22,7 @@ class SurveyTransformer:
         survey_df = self._generate_quality_coefficient(df=survey_df)
         
         # Analisar fatores que influenciam a recomendação do projeto
+        # Requisito não necessitou de contas ou transformações pesadas, colunas buscadas necessárias adquiridas na extração.
         
         # Analisar distribuição de participantes entre os anos do EM no programa
         survey_df = self._transform_high_school_year(df=survey_df)
@@ -62,7 +63,7 @@ class SurveyTransformer:
         )
 
         df["crescimento_interesse_percentual"] = (
-            (df["interesse_stem_depois"] - df["interesse_stem_antes"]) * 20
+            (df["interesse_stem_pos"] - df["interesse_stem_antes"]) * 20
         )
         
         return df
@@ -76,7 +77,7 @@ class SurveyTransformer:
     
     def _generate_quality_coefficient(self, df:pd.DataFrame):
         df["coeficiente_de_qualidade"] = (
-            (df["aplicabilidade_conhecimento"] + df["relevancia_temas"]) / 2
+            (df["aplicabilidade_conhecimento"] + df["relevancia_tema"]) / 2
         )
 
         labels = [
@@ -98,7 +99,7 @@ class SurveyTransformer:
     
     def _find_students_interested_in_stem_careers(self, df:pd.DataFrame):
         df["tem_interesse_em_stem"] = (
-            df["interesse_stem_depois"] > 3
+            df["interesse_stem_pos"] > 3
         )
         return df
     
@@ -144,17 +145,17 @@ class SurveyTransformer:
         "interesse_stem_antes_category",
         "participacao_previa_stem_category",
         "carreira_futura",
-        "relevancia_temas",
+        "relevancia_tema",
         "clareza_explicacoes",
         "compreensao_pixel_algoritmos",
         "nivel_atividades",
-        "interesse_stem_depois",
+        "interesse_stem_pos",
         "interesse_carreira_stem",
         "aplicabilidade_conhecimento",
         "space",
         "space",
         "space",
-        "space",
+        "nota_recomendacao",
         "nps_oficina"
         ]
         return df
