@@ -37,3 +37,8 @@ O modelo de dados fornece os insumos analíticos necessários para responder aos
 7. **Evolução Volumétrica:** Monitorar a evolução histórica do número de participantes das oficinas ao longo do tempo.
 8. **Análise de Atividades:** Comparar a aderência e o engajamento entre os diferentes tipos de atividades e temas oferecidos.
 
+--- 
+
+## Diagrama do Projeto 
+
+- 

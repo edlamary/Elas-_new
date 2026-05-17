@@ -1,0 +1,18 @@
+## Modelagem do Banco de Dados (Star Schema)
+
+A modelagem dimensional foi projetada utilizando a abordagem de **Esquema Estrela (Star Schema)** para otimizar a performance das consultas analíticas que alimentam a camada de apresentação (Dashboard).
+
+### Tabelas de Dimensão
+* **`dim_participante`**: Armazena o perfil demográfico das pessoas impactadas.
+  * Atributos: `sk_participante` (PK), `idade`, `ano_ensino_medio`.
+* **`dim_evento`**: Classifica os tipos de intervenções e oficinas realizadas.
+  * Atributos: `sk_evento` (PK), `tipo_de_acao`, `tema`.
+* **`dim_tempo`**: Garante a granularidade cronológica para análises temporais históricas.
+  * Atributos: `sk_tempo` (PK), `dia`, `mes`, `ano`.
+
+### Tabelas Fato
+* **`fato_activities`**: Grânulo focado no comportamento individual de cada participante por oficina. Contém chaves estrangeiras para as dimensões e métricas de satisfação:
+  * Atributos chaves: `sk_fato_atividade` (PK), `sk_participante`, `sk_evento`, `sk_tempo`.
+  * Indicadores de Performance: `coeficiente_de_qualidade`, `crescimento_de_interesse`, `cresceu_interesse`, `tem_interesse_em_stem`, `participacao_previa_stem`, `nota_recomendacao`, `relevancia_tema`, `aplicabilidade_conhecimento`, `interesse_stem_pos`.
+* **`fato_evento_resumo`**: Tabela agregada focada na volumetria geral agregada por evento e tempo.
+  * Atributos: `sk_fato_evento_resumo` (PK), `sk_evento`, `sk_tempo`, `qtd_participants`.
