@@ -39,6 +39,7 @@ O modelo de dados fornece os insumos analíticos necessários para responder aos
 
 --- 
 
-## Diagrama do Projeto 
+## Diagrama do Projeto & Wireframe Interativo
 
-- 
+- https://github.com/ICEI-PUC-Minas-PMV-SI/ellas/blob/50b0be4cfd245739a435dceeb7cc06d617eb2804/docs/ellas%2B%2B-der.png
+- https://github.com/ICEI-PUC-Minas-PMV-SI/ellas/blob/50b0be4cfd245739a435dceeb7cc06d617eb2804/docs/Elas%20%2B%2B%20-%20Projeto%20de%20Extens%C3%A3o.html
