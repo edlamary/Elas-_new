@@ -22,7 +22,7 @@ class SurveyTransformer:
         survey_df = self._generate_quality_coefficient(df=survey_df)
         
         # Analisar fatores que influenciam a recomendação do projeto
-        # Requisito não necessitou de contas ou transformações pesadas, colunas buscadas necessárias adquiridas na extração.
+        # Requisito não necessitou de contas ou transformações pesadas, colunas buscadas () necessárias adquiridas na extração.
         
         # Analisar distribuição de participantes entre os anos do EM no programa
         survey_df = self._transform_high_school_year(df=survey_df)
@@ -155,7 +155,7 @@ class SurveyTransformer:
         "space",
         "space",
         "space",
-        "nota_recomendacao",
-        "nps_oficina"
+        "space",
+        "nota_recomendacao"
         ]
         return df
