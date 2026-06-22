@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guia de Execução — Pipeline ETL Elas++</title>
+  <style>
+    :root {
+      --purple:       #6c3ac7;
+      --purple-mid:   #7c3aed;
+      --purple-light: #ede9fb;
+      --purple-xlt:   #f5f3ff;
+      --green:        #16a34a;
+      --green-light:  #dcfce7;
+      --orange:       #ea580c;
+      --orange-light: #ffedd5;
+      --red:          #dc2626;
+      --red-light:    #fee2e2;
+      --border:       #e0d9f5;
+      --gray-bg:      #f8f7fc;
+      --text:         #1e1b2e;
+      --muted:        #6b7280;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--gray-bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    /* ── HEADER ─────────────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #4f1d96 0%, #7c3aed 55%, #c084fc 100%);
+      color: #fff;
+      padding: 3rem 2rem 2.5rem;
+      text-align: center;
+    }
+    header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 999px;
+      padding: .25rem 1rem;
+      font-size: .78rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    header h1 { font-size: 2rem; font-weight: 800; }
+    header p  { margin-top: .6rem; font-size: 1rem; opacity: .88; max-width: 600px; margin-inline: auto; }
+
+    /* ── NAV / PROGRESS ──────────────────────────────── */
+    .progress-bar {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: .9rem 1.5rem;
+      display: flex;
+      gap: .5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .prog-item {
+      display: flex; align-items: center; gap: .4rem;
+      font-size: .8rem; color: var(--muted);
+    }
+    .prog-dot {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--purple); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .72rem; font-weight: 700; flex-shrink: 0;
+    }
+    .prog-sep { color: var(--border); font-size: 1.2rem; }
+
+    /* ── LAYOUT ──────────────────────────────────────── */
+    main { max-width: 860px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+    /* ── STEP CARDS ──────────────────────────────────── */
+    .step {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.75rem 1.75rem 1.75rem 1.5rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .step::before {
+      content: '';
+      position: absolute; top: 0; left: 0; bottom: 0; width: 5px;
+      background: var(--purple-mid);
+    }
+    .step-header {
+      display: flex; align-items: flex-start; gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .step-num {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--purple); color: #fff;
+      font-size: .95rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-title { font-size: 1.1rem; font-weight: 700; margin-bottom: .15rem; }
+    .step-subtitle { font-size: .83rem; color: var(--muted); }
+    .step-body p { font-size: .92rem; margin-bottom: .75rem; }
+    .step-body p:last-child { margin-bottom: 0; }
+
+    /* ── OS TABS ─────────────────────────────────────── */
+    .os-tabs { display: flex; gap: .5rem; margin-bottom: .75rem; flex-wrap: wrap; }
+    .os-tab {
+      border: 1.5px solid var(--border); border-radius: 8px;
+      padding: .3rem .75rem; font-size: .78rem; font-weight: 600;
+      cursor: default; color: var(--muted); background: #fff;
+    }
+    .os-tab.active { border-color: var(--purple); color: var(--purple); background: var(--purple-light); }
+
+    /* ── CODE ────────────────────────────────────────── */
+    pre, code.block {
+      background: #1e1b2e; color: #e2d9f3;
+      border-radius: 9px; padding: 1rem 1.1rem;
+      font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      font-size: .84rem; overflow-x: auto;
+      border: 1px solid #3b2f6a;
+      display: block; margin: .5rem 0;
+    }
+    code.inline {
+      background: var(--purple-light); color: var(--purple);
+      border-radius: 4px; padding: .1rem .4rem;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: .86em;
+    }
+    .cmt { color: #7c6f9e; }
+    .key { color: #a78bfa; }
+    .val { color: #86efac; }
+
+    /* ── ENV TABLE ───────────────────────────────────── */
+    .env-table { width: 100%; border-collapse: collapse; font-size: .875rem; margin-top: .75rem; }
+    .env-table th {
+      background: var(--purple); color: #fff;
+      padding: .55rem .9rem; text-align: left; font-weight: 600;
+    }
+    .env-table td {
+      padding: .55rem .9rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .env-table tr:nth-child(even) td { background: var(--purple-xlt); }
+    .env-table tr:last-child td { border-bottom: none; }
+    .req { color: var(--red); font-weight: 700; font-size: .8rem; }
+    .opt { color: var(--muted); font-size: .8rem; }
+
+    /* ── CALLOUT BOXES ───────────────────────────────── */
+    .callout {
+      border-radius: 10px; padding: .9rem 1.1rem;
+      font-size: .875rem; display: flex; gap: .65rem; align-items: flex-start;
+      margin-top: .75rem;
+    }
+    .callout-icon { flex-shrink: 0; font-size: 1.1rem; margin-top: .05rem; }
+    .callout-info    { background: var(--purple-light); border-left: 4px solid var(--purple); }
+    .callout-warn    { background: var(--orange-light); border-left: 4px solid var(--orange); }
+    .callout-success { background: var(--green-light);  border-left: 4px solid var(--green); }
+    .callout-danger  { background: var(--red-light);    border-left: 4px solid var(--red); }
+
+    /* ── FLOW DIAGRAM ────────────────────────────────── */
+    .flow {
+      display: flex; align-items: center; gap: .6rem;
+      flex-wrap: wrap; margin: 1rem 0;
+    }
+    .flow-box {
+      background: var(--purple-light); border: 1.5px solid var(--border);
+      border-radius: 8px; padding: .5rem .9rem;
+      font-size: .82rem; font-weight: 600; color: var(--purple);
+      text-align: center;
+    }
+    .flow-arrow { color: var(--muted); font-size: 1.2rem; }
+
+    /* ── CHECKLIST ───────────────────────────────────── */
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: .5rem; margin-top: .6rem; }
+    .checklist li {
+      display: flex; align-items: flex-start; gap: .6rem;
+      font-size: .9rem;
+    }
+    .checklist .ck { flex-shrink: 0; margin-top: .1rem; }
+    .ck-yes { color: var(--green); font-weight: 700; }
+    .ck-no  { color: var(--red);   font-weight: 700; }
+
+    /* ── SECTION HEADER ──────────────────────────────── */
+    .section-label {
+      font-size: .72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--purple);
+      margin: 2.5rem 0 .9rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1; height: 1px; background: var(--border);
+    }
+
+    /* ── FOOTER ──────────────────────────────────────── */
+    footer {
+      text-align: center; color: var(--muted); font-size: .82rem;
+      padding: 1.5rem; border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Guia Prático</div>
+  <h1>Como executar a Pipeline ETL do Elas++</h1>
+  <p>Um guia passo a passo para quem nunca mexeu com esse projeto antes</p>
+</header>
+
+<!-- BARRA DE PROGRESSO -->
+<div class="progress-bar">
+  <div class="prog-item"><div class="prog-dot">1</div> Instalar ferramentas</div>
+  <div class="prog-sep">›</div>
+  <div class="prog-item"><div class="prog-dot">2</div> Baixar o código</div>
+  <div class="prog-sep">›</div>
+  <div class="prog-item"><div class="prog-dot">3</div> Configurar credenciais</div>
+  <div class="prog-sep">›</div>
+  <div class="prog-item"><div class="prog-dot">4</div> Instalar dependências</div>
+  <div class="prog-sep">›</div>
+  <div class="prog-item"><div class="prog-dot">5</div> Executar</div>
+  <div class="prog-sep">›</div>
+  <div class="prog-item"><div class="prog-dot">6</div> Verificar resultado</div>
+</div>
+
+<main>
+
+  <!-- O QUE FAZ -->
+  <div class="section-label">O que essa pipeline faz?</div>
+
+  <div style="background:#fff; border:1px solid var(--border); border-radius:14px; padding:1.5rem; margin-bottom:1.5rem;">
+    <p style="font-size:.95rem; margin-bottom:1rem;">
+      A pipeline ETL do Elas++ é um programa Python que, toda vez que é executado, realiza três grandes tarefas automaticamente:
+    </p>
+    <div class="flow">
+      <div class="flow-box">📥 Baixa a planilha<br><span style="font-weight:400; color:var(--muted)">do SharePoint</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">🔄 Limpa e organiza<br><span style="font-weight:400; color:var(--muted)">os dados</span></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box">☁️ Salva no banco<br><span style="font-weight:400; color:var(--muted)">PostgreSQL (Railway)</span></div>
+    </div>
+    <p style="font-size:.88rem; color:var(--muted); margin-top:.75rem;">
+      Após a execução, as tabelas do banco de dados ficam atualizadas e prontas para alimentar o dashboard de BI.
+    </p>
+  </div>
+
+  <!-- PASSO 1 -->
+  <div class="section-label">Pré-requisitos — instale uma vez só</div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">Instalar Python 3.13 ou superior</div>
+        <div class="step-subtitle">O programa que vai rodar o nosso código</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>
+        Acesse <strong>python.org/downloads</strong> e baixe a versão mais recente para o seu sistema.
+        Durante a instalação no Windows, marque a opção <strong>"Add Python to PATH"</strong> antes de clicar em instalar.
+      </p>
+      <p>Depois de instalar, verifique se funcionou abrindo o terminal e digitando:</p>
+
+      <div class="os-tabs">
+        <div class="os-tab active">Windows (PowerShell)</div>
+        <div class="os-tab active">Mac / Linux</div>
+      </div>
+      <pre>python --version
+<span class="cmt"># Deve aparecer: Python 3.13.x</span></pre>
+
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div>No Mac/Linux, pode ser necessário usar <code class="inline">python3</code> no lugar de <code class="inline">python</code>.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">Instalar Git</div>
+        <div class="step-subtitle">Ferramenta para baixar e gerenciar o código</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>
+        Acesse <strong>git-scm.com/downloads</strong> e instale a versão para o seu sistema operacional.
+        Não é necessário alterar nenhuma opção padrão durante a instalação.
+      </p>
+      <p>Verifique a instalação:</p>
+      <pre>git --version
+<span class="cmt"># Deve aparecer: git version 2.x.x</span></pre>
+    </div>
+  </div>
+
+  <!-- PASSO 2 -->
+  <div class="section-label">Baixar o código</div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">Clonar o repositório</div>
+        <div class="step-subtitle">Baixar todos os arquivos do projeto para o seu computador</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>Abra o terminal (no Windows: pesquise por "PowerShell" no menu Iniciar) e execute:</p>
+      <pre>git clone https://github.com/ICEI-PUC-Minas-PMV-SI/ellas.git
+cd ellas</pre>
+      <p>Isso vai criar uma pasta chamada <code class="inline">ellas</code> no seu computador com todo o código do projeto.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">Criar o ambiente virtual</div>
+        <div class="step-subtitle">Um espaço isolado para instalar as dependências do projeto</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>
+        O ambiente virtual evita conflitos com outros projetos Python no seu computador.
+        Dentro da pasta <code class="inline">ellas</code>, execute:
+      </p>
+
+      <div class="os-tabs"><div class="os-tab active">Mac / Linux</div></div>
+      <pre>python3 -m venv .venv
+source .venv/bin/activate</pre>
+
+      <div class="os-tabs"><div class="os-tab active">Windows (PowerShell)</div></div>
+      <pre>python -m venv .venv
+.venv\Scripts\Activate.ps1</pre>
+
+      <p>Quando ativado, você verá <code class="inline">(.venv)</code> no início da linha do terminal. Isso confirma que está dentro do ambiente virtual.</p>
+
+      <div class="callout callout-warn">
+        <div class="callout-icon">⚠️</div>
+        <div>
+          Se no Windows aparecer uma mensagem de "execução de scripts desabilitada", execute este comando primeiro:
+          <pre style="margin-top:.5rem;">Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASSO 3 — CREDENCIAIS -->
+  <div class="section-label">Configurar credenciais</div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">5</div>
+      <div>
+        <div class="step-title">Criar o arquivo de configuração <code class="inline">.env</code></div>
+        <div class="step-subtitle">Onde ficam as senhas e endereços dos serviços</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>
+        Na raiz da pasta <code class="inline">ellas</code>, crie um arquivo chamado exatamente <strong>.env</strong>
+        (com o ponto na frente). Abra-o em qualquer editor de texto e cole o conteúdo abaixo,
+        preenchendo cada valor com as informações fornecidas pelo responsável do projeto:
+      </p>
+      <pre><span class="cmt"># ── Banco de Dados PostgreSQL (Railway) ──────────────</span>
+<span class="key">POSTGRES_HOST</span>=<span class="val">seu_host_aqui</span>
+<span class="key">POSTGRES_PORT</span>=<span class="val">5432</span>
+<span class="key">POSTGRES_DB</span>=<span class="val">railway</span>
+<span class="key">POSTGRES_USER</span>=<span class="val">seu_usuario_aqui</span>
+<span class="key">POSTGRES_PASSWORD</span>=<span class="val">sua_senha_aqui</span>
+
+<span class="cmt"># ── SharePoint (fonte dos dados) ──────────────────────</span>
+<span class="key">SHAREPOINT_URL</span>=<span class="val">https://suaorganizacao.sharepoint.com/sites/ellas</span>
+<span class="key">SHAREPOINT_TENANT</span>=<span class="val">id-do-tenant-azure</span>
+<span class="key">SHAREPOINT_CLIENT_ID</span>=<span class="val">id-do-app-azure</span>
+<span class="key">SHAREPOINT_USER</span>=<span class="val">seu_email@pucminas.br</span>
+<span class="key">SHAREPOINT_PASS</span>=<span class="val">sua_senha</span>
+<span class="key">FILE_PATH</span>=<span class="val">/sites/ellas/Documentos Compartilhados/planilha.xlsx</span></pre>
+
+      <div class="callout callout-danger">
+        <div class="callout-icon">🔒</div>
+        <div>
+          <strong>Nunca compartilhe o arquivo .env!</strong> Ele contém senhas e credenciais de acesso.
+          Não o envie por e-mail, WhatsApp ou faça upload no GitHub. Esse arquivo já está configurado
+          para ser ignorado pelo Git.
+        </div>
+      </div>
+
+      <div style="margin-top:1rem;">
+        <strong style="font-size:.9rem;">Referência das variáveis:</strong>
+        <table class="env-table">
+          <thead>
+            <tr><th>Variável</th><th>O que é</th><th>De onde obter</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code class="inline">POSTGRES_HOST</code></td>
+              <td>Endereço do banco de dados <span class="req">obrigatório</span></td>
+              <td>Painel do Railway → seu banco → Connection Details</td>
+            </tr>
+            <tr>
+              <td><code class="inline">POSTGRES_PASSWORD</code></td>
+              <td>Senha do banco <span class="req">obrigatório</span></td>
+              <td>Painel do Railway → seu banco → Connection Details</td>
+            </tr>
+            <tr>
+              <td><code class="inline">SHAREPOINT_TENANT</code></td>
+              <td>ID do tenant Azure <span class="req">obrigatório</span></td>
+              <td>Responsável técnico do projeto / admin Azure AD</td>
+            </tr>
+            <tr>
+              <td><code class="inline">SHAREPOINT_CLIENT_ID</code></td>
+              <td>ID do app registrado no Azure <span class="req">obrigatório</span></td>
+              <td>Responsável técnico do projeto / admin Azure AD</td>
+            </tr>
+            <tr>
+              <td><code class="inline">SHAREPOINT_USER</code> / <code class="inline">PASS</code></td>
+              <td>Login de acesso ao SharePoint <span class="req">obrigatório</span></td>
+              <td>Suas credenciais institucionais PUC Minas</td>
+            </tr>
+            <tr>
+              <td><code class="inline">FILE_PATH</code></td>
+              <td>Caminho da planilha no SharePoint <span class="req">obrigatório</span></td>
+              <td>Responsável técnico do projeto</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASSO 4 — DEPENDÊNCIAS -->
+  <div class="section-label">Instalar as dependências</div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">6</div>
+      <div>
+        <div class="step-title">Instalar os pacotes Python necessários</div>
+        <div class="step-subtitle">Feito uma única vez, ou quando o requirements.txt for atualizado</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>
+        Com o ambiente virtual ativado (você verá <code class="inline">(.venv)</code> no terminal),
+        execute:
+      </p>
+      <pre>pip install -r requirements.txt</pre>
+      <p>
+        Isso vai instalar automaticamente todos os pacotes que o projeto precisa: pandas,
+        SQLAlchemy, psycopg2 (driver do PostgreSQL), msal (autenticação SharePoint), entre outros.
+        O processo pode demorar alguns minutos na primeira vez.
+      </p>
+      <div class="callout callout-success">
+        <div class="callout-icon">✅</div>
+        <div>Você saberá que funcionou quando aparecer: <strong>Successfully installed ...</strong> no terminal.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASSO 5 — EXECUTAR -->
+  <div class="section-label">Executar a pipeline</div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">7</div>
+      <div>
+        <div class="step-title">Rodar o programa principal</div>
+        <div class="step-subtitle">Este é o comando que você vai usar toda vez que precisar atualizar os dados</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>Certifique-se de que:</p>
+      <ul class="checklist">
+        <li><span class="ck ck-yes">✓</span> Você está na pasta <code class="inline">ellas</code></li>
+        <li><span class="ck ck-yes">✓</span> O ambiente virtual está ativado (<code class="inline">(.venv)</code> aparece no terminal)</li>
+        <li><span class="ck ck-yes">✓</span> O arquivo <code class="inline">.env</code> está criado e preenchido</li>
+        <li><span class="ck ck-yes">✓</span> Você tem acesso à internet</li>
+      </ul>
+
+      <p style="margin-top:1rem;">Então execute:</p>
+      <pre>python src/main.py</pre>
+
+      <p>O programa vai:</p>
+      <ul style="margin-left:1.25rem; font-size:.9rem; margin-top:.5rem;">
+        <li>Conectar ao SharePoint e baixar a planilha mais recente</li>
+        <li>Processar e limpar os dados</li>
+        <li>Apagar os dados antigos do banco e inserir os novos</li>
+      </ul>
+
+      <div class="callout callout-info" style="margin-top:1rem;">
+        <div class="callout-icon">ℹ️</div>
+        <div>
+          O processo demora cerca de <strong>1 a 3 minutos</strong> dependendo da velocidade da sua
+          internet e do tamanho da planilha. Não feche o terminal enquanto estiver rodando.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PASSO 6 — VERIFICAR -->
+  <div class="section-label">Verificar o resultado</div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">8</div>
+      <div>
+        <div class="step-title">Como saber se funcionou?</div>
+        <div class="step-subtitle">Sinais de sucesso e como interpretar mensagens de erro</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p><strong>Execução bem-sucedida — o terminal não exibirá erros</strong> e o programa encerrará normalmente. Em seguida, os dados já estarão disponíveis no banco PostgreSQL para o dashboard.</p>
+
+      <div style="margin-top:1rem;"><strong>Erros comuns e como resolver:</strong></div>
+
+      <div class="callout callout-danger" style="margin-top:.75rem;">
+        <div class="callout-icon">❌</div>
+        <div>
+          <strong>Falha na autenticação</strong> — <em>"Falha na autenticação: ..."</em><br>
+          O usuário ou senha do SharePoint estão errados no <code class="inline">.env</code>.
+          Verifique as variáveis <code class="inline">SHAREPOINT_USER</code> e <code class="inline">SHAREPOINT_PASS</code>.
+        </div>
+      </div>
+
+      <div class="callout callout-danger" style="margin-top:.75rem;">
+        <div class="callout-icon">❌</div>
+        <div>
+          <strong>Erro de conexão com o banco</strong> — <em>"could not connect to server"</em><br>
+          As credenciais do PostgreSQL estão incorretas ou o banco está offline.
+          Verifique as variáveis <code class="inline">POSTGRES_*</code> no <code class="inline">.env</code>.
+        </div>
+      </div>
+
+      <div class="callout callout-danger" style="margin-top:.75rem;">
+        <div class="callout-icon">❌</div>
+        <div>
+          <strong>Módulo não encontrado</strong> — <em>"ModuleNotFoundError: No module named ..."</em><br>
+          O ambiente virtual não está ativado, ou o <code class="inline">pip install</code> não foi executado.
+          Volte ao Passo 4 e 6.
+        </div>
+      </div>
+
+      <div class="callout callout-success" style="margin-top:.75rem;">
+        <div class="callout-icon">✅</div>
+        <div>
+          Se tudo estiver correto e ainda assim der erro, entre em contato com o responsável técnico
+          do projeto informando a mensagem de erro completa que apareceu no terminal.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALTERNATIVA DOCKER -->
+  <div class="section-label">Alternativa — usar Docker (avançado)</div>
+
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">★</div>
+      <div>
+        <div class="step-title">Executar via Docker</div>
+        <div class="step-subtitle">Sem precisar instalar Python — apenas Docker Desktop</div>
+      </div>
+    </div>
+    <div class="step-body">
+      <p>
+        Se você prefere não configurar o Python localmente, pode usar o Docker.
+        Instale o <strong>Docker Desktop</strong> em <strong>docker.com/products/docker-desktop</strong>,
+        depois execute dentro da pasta <code class="inline">ellas</code>:
+      </p>
+      <pre><span class="cmt"># 1. Construir a imagem (só precisa fazer uma vez)</span>
+docker build -t ellas-etl .
+
+<span class="cmt"># 2. Executar passando o arquivo de credenciais</span>
+docker run --env-file .env ellas-etl</pre>
+      <div class="callout callout-info">
+        <div class="callout-icon">ℹ️</div>
+        <div>
+          O arquivo <code class="inline">.env</code> ainda é necessário. Crie-o conforme o Passo 5 antes de rodar o Docker.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESUMO RÁPIDO -->
+  <div class="section-label">Resumo — sequência de comandos completa</div>
+  <div style="background:#1e1b2e; border-radius:12px; padding:1.5rem; border:1px solid #3b2f6a;">
+    <pre style="background:none; border:none; padding:0; margin:0; color:#e2d9f3;"><span class="cmt"># 1. Clonar o repositório</span>
+git clone https://github.com/ICEI-PUC-Minas-PMV-SI/ellas.git
+cd ellas
+
+<span class="cmt"># 2. Criar e ativar ambiente virtual</span>
+python3 -m venv .venv
+source .venv/bin/activate        <span class="cmt"># Mac/Linux</span>
+<span class="cmt"># .venv\Scripts\Activate.ps1    # Windows</span>
+
+<span class="cmt"># 3. Instalar dependências</span>
+pip install -r requirements.txt
+
+<span class="cmt"># 4. Criar o arquivo .env com as credenciais (veja Passo 5)</span>
+
+<span class="cmt"># 5. Executar a pipeline</span>
+python src/main.py</pre>
+  </div>
+
+</main>
+
+<footer>
+  Elas++ — Programa de Extensão PUC Minas &nbsp;·&nbsp; Guia gerado em junho de 2026
+</footer>
+
+</body>
+</html>

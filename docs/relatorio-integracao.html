@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relatório de Integração — Elas++</title>
+  <style>
+    :root {
+      --purple:  #6c3ac7;
+      --purple-light: #ede9fb;
+      --green:   #16a34a;
+      --red:     #dc2626;
+      --yellow:  #ca8a04;
+      --gray-bg: #f8f7fc;
+      --border:  #e0d9f5;
+      --text:    #1e1b2e;
+      --muted:   #6b7280;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--gray-bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ─────────────────────────────── */
+    header {
+      background: linear-gradient(135deg, #4f1d96 0%, #7c3aed 60%, #a78bfa 100%);
+      color: #fff;
+      padding: 3rem 2rem 2.5rem;
+      text-align: center;
+    }
+    header .badge {
+      display: inline-block;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 999px;
+      padding: .25rem 1rem;
+      font-size: .78rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    header h1 { font-size: 2rem; font-weight: 700; }
+    header p  { margin-top: .5rem; font-size: 1rem; opacity: .85; }
+    .meta {
+      display: flex; justify-content: center; gap: 2rem;
+      margin-top: 1.5rem; flex-wrap: wrap;
+    }
+    .meta-item { font-size: .85rem; opacity: .8; }
+    .meta-item strong { display: block; font-size: 1rem; opacity: 1; }
+
+    /* ── LAYOUT ─────────────────────────────── */
+    main { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+    section { margin-bottom: 3rem; }
+    h2 {
+      font-size: 1.25rem; font-weight: 700; color: var(--purple);
+      border-bottom: 2px solid var(--border);
+      padding-bottom: .5rem; margin-bottom: 1.25rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    h2 .icon { font-size: 1.1rem; }
+    h3 { font-size: 1rem; font-weight: 600; margin: 1.25rem 0 .5rem; color: var(--text); }
+
+    /* ── SUMMARY CARDS ───────────────────────── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1rem;
+      text-align: center;
+    }
+    .card .num { font-size: 2rem; font-weight: 800; color: var(--purple); }
+    .card .label { font-size: .8rem; color: var(--muted); margin-top: .25rem; }
+
+    /* ── DIFF TABLE ──────────────────────────── */
+    .diff-table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    .diff-table th {
+      background: var(--purple); color: #fff;
+      padding: .6rem .9rem; text-align: left; font-weight: 600;
+    }
+    .diff-table td {
+      padding: .6rem .9rem; border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .diff-table tr:nth-child(even) td { background: var(--purple-light); }
+    .diff-table tr:last-child td { border-bottom: none; }
+
+    /* ── CHANGE ITEMS ────────────────────────── */
+    .change-list { list-style: none; display: flex; flex-direction: column; gap: .75rem; }
+    .change-item {
+      display: flex; gap: .75rem; align-items: flex-start;
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem 1.1rem;
+    }
+    .tag {
+      border-radius: 6px; padding: .2rem .55rem;
+      font-size: .7rem; font-weight: 700; text-transform: uppercase;
+      white-space: nowrap; flex-shrink: 0; margin-top: .1rem;
+      letter-spacing: .04em;
+    }
+    .tag-new    { background: #dcfce7; color: var(--green); }
+    .tag-changed{ background: #fef9c3; color: var(--yellow); }
+    .tag-removed{ background: #fee2e2; color: var(--red); }
+    .tag-refactor{ background: var(--purple-light); color: var(--purple); }
+
+    .change-title { font-weight: 600; margin-bottom: .2rem; }
+    .change-desc  { font-size: .875rem; color: var(--muted); }
+
+    /* ── CODE BLOCK ──────────────────────────── */
+    .code-block {
+      background: #1e1b2e; color: #e2d9f3;
+      border-radius: 10px; padding: 1.1rem 1.25rem;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: .83rem; overflow-x: auto;
+      border: 1px solid #3b2f6a;
+    }
+    .code-block .add  { color: #86efac; }
+    .code-block .rem  { color: #fca5a5; }
+    .code-block .cmt  { color: #7c6f9e; }
+
+    /* ── ARCHITECTURE DIAGRAM ────────────────── */
+    .arch-box {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.5rem;
+      display: flex; flex-direction: column; gap: 1rem;
+    }
+    .arch-row {
+      display: flex; gap: 1rem; align-items: stretch; flex-wrap: wrap;
+    }
+    .arch-node {
+      flex: 1; min-width: 160px;
+      border-radius: 10px; padding: 1rem;
+      border: 2px solid; text-align: center;
+    }
+    .arch-node .node-title { font-weight: 700; font-size: .9rem; }
+    .arch-node .node-sub   { font-size: .78rem; color: var(--muted); margin-top: .25rem; }
+    .node-before { border-color: #fca5a5; background: #fff5f5; }
+    .node-after  { border-color: #86efac; background: #f0fdf4; }
+    .node-shared { border-color: #a78bfa; background: var(--purple-light); }
+    .arch-arrow  { text-align: center; font-size: 1.4rem; color: var(--muted); line-height: 1; padding: .5rem 0; }
+    .arch-label  { font-size: .72rem; font-weight: 600; text-transform: uppercase;
+                   letter-spacing: .07em; color: var(--muted); margin-bottom: .25rem; }
+
+    /* ── FOOTER ──────────────────────────────── */
+    footer {
+      text-align: center; color: var(--muted); font-size: .82rem;
+      padding: 1.5rem; border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Relatório Técnico de Integração</div>
+  <h1>Integração dos Projetos Elas++</h1>
+  <p>Evolução de um script de extração para uma pipeline ETL completa com banco analítico</p>
+  <div class="meta">
+    <div class="meta-item"><strong>Origem</strong>Elas++_Pessoal</div>
+    <div class="meta-item"><strong>Destino</strong>ellas (Cópia)</div>
+    <div class="meta-item"><strong>Data</strong>Junho de 2026</div>
+    <div class="meta-item"><strong>Status</strong>Integrado ✓</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- RESUMO -->
+  <section>
+    <h2><span class="icon">📊</span> Resumo Executivo</h2>
+    <div class="summary-grid">
+      <div class="card"><div class="num">1→7</div><div class="label">Arquivos Python</div></div>
+      <div class="card"><div class="num">4→14</div><div class="label">Dependências</div></div>
+      <div class="card"><div class="num">CSV→PG</div><div class="label">Destino dos dados</div></div>
+      <div class="card"><div class="num">5</div><div class="label">Tabelas no DW</div></div>
+      <div class="card"><div class="num">3.12→3.13</div><div class="label">Versão do Python</div></div>
+    </div>
+    <p>
+      O projeto <strong>Elas++_Pessoal</strong> era um script único (<code>download_sharepoint.py</code>)
+      responsável apenas por baixar a planilha do SharePoint e convertê-la para CSV.
+      Na integração com o repositório principal (<strong>ellas</strong>), esse script foi
+      absorvido e expandido em uma pipeline ETL estruturada com separação de responsabilidades,
+      modelagem dimensional (Star Schema) e carga em banco de dados PostgreSQL hospedado em nuvem.
+    </p>
+  </section>
+
+  <!-- ANTES / DEPOIS -->
+  <section>
+    <h2><span class="icon">🏗️</span> Arquitetura: Antes × Depois</h2>
+    <div class="arch-box">
+      <div>
+        <div class="arch-label">Antes — Elas++_Pessoal</div>
+        <div class="arch-row">
+          <div class="arch-node node-before">
+            <div class="node-title">SharePoint</div>
+            <div class="node-sub">Planilha .xlsx</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node node-before">
+            <div class="node-title">download_sharepoint.py</div>
+            <div class="node-sub">Extrai aba e salva CSV</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node node-before">
+            <div class="node-title">output/formulario_feedback.csv</div>
+            <div class="node-sub">Arquivo local</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="arch-label">Depois — ellas (Cópia)</div>
+        <div class="arch-row">
+          <div class="arch-node node-after">
+            <div class="node-title">SharePoint</div>
+            <div class="node-sub">Planilha .xlsx</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node node-after">
+            <div class="node-title">SharePointSpreadsheetSource</div>
+            <div class="node-sub">Extrai .xlsx para temp file</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node node-after">
+            <div class="node-title">SurveyExtractor + Transformer</div>
+            <div class="node-sub">Limpeza, normalização, métricas</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-node node-after">
+            <div class="node-title">SchemaMaker → PostgreSQL</div>
+            <div class="node-sub">5 tabelas — Star Schema</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MUDANÇAS DETALHADAS -->
+  <section>
+    <h2><span class="icon">🔀</span> Mudanças Detalhadas por Componente</h2>
+
+    <h3>1. Ponto de entrada — main.py</h3>
+    <ul class="change-list">
+      <li class="change-item">
+        <span class="tag tag-new">novo</span>
+        <div>
+          <div class="change-title">Orquestrador de pipeline substituiu script linear</div>
+          <div class="change-desc">
+            O projeto pessoal não tinha <code>main.py</code>. O projeto integrado introduz um
+            <code>main()</code> que instancia e encadeia todos os serviços via injeção de dependência,
+            tornando cada etapa testável e substituível de forma independente.
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <h3>2. Extração do SharePoint</h3>
+    <ul class="change-list">
+      <li class="change-item">
+        <span class="tag tag-refactor">refactor</span>
+        <div>
+          <div class="change-title">Script global → classe SharePointSpreadsheetSource</div>
+          <div class="change-desc">
+            As funções <code>get_access_token()</code> e <code>download_xlsx_bytes()</code> do script
+            pessoal foram encapsuladas na classe <code>SharePointSpreadsheetSource</code> em
+            <code>src/services/sharepoint_spreadsheet_source.py</code>. O método público passa a ser
+            <code>.fetch() → Path</code>, retornando o arquivo temporário em vez de escrever CSV.
+          </div>
+        </div>
+      </li>
+      <li class="change-item">
+        <span class="tag tag-removed">removido</span>
+        <div>
+          <div class="change-title">Exportação para CSV eliminada</div>
+          <div class="change-desc">
+            As funções <code>xlsx_sheet_to_csv()</code> e a escrita em <code>output/formulario_feedback.csv</code>
+            foram removidas. Os dados agora fluem diretamente para o PostgreSQL pela pipeline.
+          </div>
+        </div>
+      </li>
+      <li class="change-item">
+        <span class="tag tag-new">novo</span>
+        <div>
+          <div class="change-title">Interface SpreadsheetSource adicionada</div>
+          <div class="change-desc">
+            Uma interface abstrata foi criada em <code>src/services/interfaces/</code> para
+            desacoplar a pipeline do SharePoint, permitindo trocar a fonte (ex.: arquivo local,
+            S3) sem alterar o restante do código.
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <h3>3. Transformação dos dados</h3>
+    <ul class="change-list">
+      <li class="change-item">
+        <span class="tag tag-new">novo</span>
+        <div>
+          <div class="change-title">SurveyExtractor — leitura de múltiplas abas</div>
+          <div class="change-desc">
+            Enquanto o script pessoal lia apenas uma aba específica (<code>SHEET_NAME</code>),
+            o <code>SurveyExtractor</code> usa o <code>ExcelReader</code> para carregar todas as
+            abas do arquivo e consolidar os dados de formulário e de escolas.
+          </div>
+        </div>
+      </li>
+      <li class="change-item">
+        <span class="tag tag-new">novo</span>
+        <div>
+          <div class="change-title">SurveyTransformer — limpeza e métricas</div>
+          <div class="change-desc">
+            Novo serviço responsável por: normalização de colunas, padronização de tipos,
+            tratamento de valores ausentes, cálculo de métricas de engajamento e geração do
+            dataframe <code>grouped_programs_df</code> para a tabela fato de resumo de eventos.
+          </div>
+        </div>
+      </li>
+      <li class="change-item">
+        <span class="tag tag-new">novo</span>
+        <div>
+          <div class="change-title">SchoolExtractor — fonte de dados de escolas</div>
+          <div class="change-desc">
+            Nova extração a partir da planilha de parceiros
+            (<code>Parceiros (escolas, entidades, etc).xlsx</code>) para popular a dimensão de
+            participantes com dados de escola de origem.
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <h3>4. Carga — banco de dados PostgreSQL</h3>
+    <ul class="change-list">
+      <li class="change-item">
+        <span class="tag tag-new">novo</span>
+        <div>
+          <div class="change-title">SchemaMaker — carga no Star Schema</div>
+          <div class="change-desc">
+            O <code>SchemaMaker</code> recebe os DataFrames transformados e popula as 5 tabelas
+            do Data Warehouse: <code>dim_participante</code>, <code>dim_evento</code>,
+            <code>dim_tempo</code>, <code>fato_atividades</code> e <code>fato_evento_resumo</code>.
+          </div>
+        </div>
+      </li>
+      <li class="change-item">
+        <span class="tag tag-new">novo</span>
+        <div>
+          <div class="change-title">Classe Postgres — conexão via SQLAlchemy</div>
+          <div class="change-desc">
+            Criada em <code>src/db/postgres.py</code>, gerencia o pool de conexões para o banco
+            Railway via SQLAlchemy. A pipeline inicia sempre com um <code>TRUNCATE</code> das
+            tabelas para garantir idempotência nas cargas.
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <h3>5. Dockerfile</h3>
+    <ul class="change-list">
+      <li class="change-item">
+        <span class="tag tag-changed">alterado</span>
+        <div>
+          <div class="change-title">Python 3.12 → 3.13 e adição de dependências do sistema</div>
+          <div class="change-desc">
+            A imagem base foi atualizada. Foram adicionados <code>gcc</code> e <code>libpq-dev</code>
+            via apt-get para compilar o driver nativo <code>psycopg2</code> do PostgreSQL.
+            O comando de entrada mudou de <code>download_sharepoint.py</code> para
+            <code>src/main.py</code>.
+          </div>
+        </div>
+      </li>
+    </ul>
+
+    <h3>6. Dependências (requirements.txt)</h3>
+    <div class="code-block">
+<span class="cmt"># ── MANTIDAS ────────────────────────────────────────</span>
+  msal==1.31.1
+  requests==2.32.3
+  openpyxl==3.1.5
+<span class="add">+ et_xmlfile==2.0.0         # dependência interna do openpyxl</span>
+
+<span class="cmt"># ── ATUALIZADA ──────────────────────────────────────</span>
+<span class="rem">- python-dotenv==1.0.1</span>
+<span class="add">+ python-dotenv==1.2.2</span>
+
+<span class="cmt"># ── ADICIONADAS (suporte à pipeline e banco) ────────</span>
+<span class="add">+ pandas==3.0.3</span>
+<span class="add">+ pandas-stubs==3.0.0.260204</span>
+<span class="add">+ numpy==2.4.4</span>
+<span class="add">+ SQLAlchemy==2.0.49</span>
+<span class="add">+ psycopg2-binary==2.9.12</span>
+<span class="add">+ python-dateutil==2.9.0.post0</span>
+<span class="add">+ greenlet==3.5.0</span>
+<span class="add">+ six==1.17.0</span>
+<span class="add">+ typing_extensions==4.15.0</span>
+<span class="add">+ tzdata==2026.2</span>
+    </div>
+  </section>
+
+  <!-- VARIÁVEIS DE AMBIENTE -->
+  <section>
+    <h2><span class="icon">🔑</span> Variáveis de Ambiente: Antes × Depois</h2>
+    <table class="diff-table">
+      <thead>
+        <tr>
+          <th>Variável</th>
+          <th>Elas++_Pessoal</th>
+          <th>ellas (Cópia)</th>
+          <th>Observação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>SHAREPOINT_URL</td><td>✓</td><td>✓</td><td>Mantida</td></tr>
+        <tr><td>SHAREPOINT_TENANT</td><td>✓</td><td>✓</td><td>Mantida</td></tr>
+        <tr><td>SHAREPOINT_CLIENT_ID</td><td>✓</td><td>✓</td><td>Mantida</td></tr>
+        <tr><td>SHAREPOINT_USER</td><td>✓</td><td>✓</td><td>Mantida</td></tr>
+        <tr><td>SHAREPOINT_PASS</td><td>✓</td><td>✓</td><td>Mantida</td></tr>
+        <tr><td>FILE_PATH</td><td>✓</td><td>✓</td><td>Mantida</td></tr>
+        <tr><td>SHEET_NAME</td><td>✓ (opcional)</td><td>— removida</td><td>Pipeline lê todas as abas automaticamente</td></tr>
+        <tr><td>DEST_PATH</td><td>✓ (opcional)</td><td>— removida</td><td>Não há mais saída em CSV</td></tr>
+        <tr><td>POSTGRES_HOST</td><td>—</td><td>✓ nova</td><td>Banco de dados Railway</td></tr>
+        <tr><td>POSTGRES_PORT</td><td>—</td><td>✓ nova</td><td>Padrão: 5432</td></tr>
+        <tr><td>POSTGRES_DB</td><td>—</td><td>✓ nova</td><td>Nome do banco: railway</td></tr>
+        <tr><td>POSTGRES_USER</td><td>—</td><td>✓ nova</td><td>Usuário PostgreSQL</td></tr>
+        <tr><td>POSTGRES_PASSWORD</td><td>—</td><td>✓ nova</td><td>Senha PostgreSQL</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ESTRUTURA DE ARQUIVOS -->
+  <section>
+    <h2><span class="icon">📁</span> Estrutura de Arquivos: Antes × Depois</h2>
+    <div class="arch-row" style="align-items:flex-start; gap: 1.5rem;">
+      <div style="flex:1; min-width:220px;">
+        <div class="arch-label">Elas++_Pessoal</div>
+        <div class="code-block" style="font-size:.82rem; line-height:1.7;">
+<span class="rem">Elas++_Pessoal/</span>
+<span class="rem">├── download_sharepoint.py</span>
+<span class="rem">├── Dockerfile</span>
+<span class="rem">├── requirements.txt</span>
+<span class="rem">├── output/</span>
+<span class="rem">│   └── formulario_feedback.csv</span>
+<span class="rem">└── relatorios/</span>
+        </div>
+      </div>
+      <div style="flex:1; min-width:220px;">
+        <div class="arch-label">ellas (Cópia)</div>
+        <div class="code-block" style="font-size:.82rem; line-height:1.7;">
+<span class="add">ellas/</span>
+<span class="add">├── src/</span>
+<span class="add">│   ├── main.py</span>
+<span class="add">│   ├── db/postgres.py</span>
+<span class="add">│   ├── services/</span>
+<span class="add">│   │   ├── sharepoint_spreadsheet_source.py</span>
+<span class="add">│   │   ├── survey_extractor.py</span>
+<span class="add">│   │   ├── survey_transformer.py</span>
+<span class="add">│   │   ├── survey_processing_pipeline.py</span>
+<span class="add">│   │   ├── schema_maker.py</span>
+<span class="add">│   │   ├── school_extractor.py</span>
+<span class="add">│   │   └── excel_reader.py</span>
+<span class="add">│   ├── utils/</span>
+<span class="add">│   └── data/ (planilhas locais)</span>
+<span class="add">├── Dockerfile</span>
+<span class="add">├── requirements.txt</span>
+<span class="add">└── railway.toml</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Elas++ — Programa de Extensão PUC Minas &nbsp;·&nbsp; Relatório gerado em junho de 2026
+</footer>
+
+</body>
+</html>

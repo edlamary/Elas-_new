@@ -37,7 +37,105 @@ O modelo de dados fornece os insumos analíticos necessários para responder aos
 7. **Evolução Volumétrica:** Monitorar a evolução histórica do número de participantes das oficinas ao longo do tempo.
 8. **Análise de Atividades:** Comparar a aderência e o engajamento entre os diferentes tipos de atividades e temas oferecidos.
 
---- 
+---
+
+## Como Instalar e Executar o Projeto
+
+### Pré-requisitos
+
+Certifique-se de que você tem instalado na sua máquina:
+
+- [Python 3.13+](https://www.python.org/downloads/)
+- [Git](https://git-scm.com/downloads)
+- Acesso a um banco de dados **PostgreSQL** (local ou em nuvem, ex.: Railway)
+- Credenciais de acesso ao **SharePoint** da organização (para extração automática dos dados)
+
+---
+
+### 1. Clonar o repositório
+
+```bash
+git clone https://github.com/ICEI-PUC-Minas-PMV-SI/ellas.git
+cd ellas
+```
+
+---
+
+### 2. Criar e ativar o ambiente virtual
+
+**Linux / macOS:**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+**Windows (PowerShell):**
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+---
+
+### 3. Instalar as dependências
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+### 4. Configurar as variáveis de ambiente
+
+Crie um arquivo `.env` na raiz do projeto com base no modelo abaixo:
+
+```env
+# Banco de dados PostgreSQL
+POSTGRES_HOST=seu_host
+POSTGRES_PORT=5432
+POSTGRES_DB=nome_do_banco
+POSTGRES_USER=seu_usuario
+POSTGRES_PASSWORD=sua_senha
+
+# SharePoint (para extração automática das planilhas)
+SHAREPOINT_URL=https://suaorganizacao.sharepoint.com/sites/seu-site
+SHAREPOINT_TENANT=id-do-tenant-azure
+SHAREPOINT_CLIENT_ID=id-do-app-azure
+SHAREPOINT_USER=seu_email@organizacao.com
+SHAREPOINT_PASS=sua_senha
+FILE_PATH=/sites/seu-site/Documentos/nome-da-planilha.xlsx
+```
+
+> **Atenção:** Nunca versione o arquivo `.env`. Ele já deve estar listado no `.gitignore`.
+
+---
+
+### 5. Executar o pipeline ETL
+
+```bash
+python src/main.py
+```
+
+O script irá:
+1. Autenticar no SharePoint e baixar a planilha de formulários
+2. Realizar as transformações e limpeza dos dados
+3. Carregar as tabelas dimensionais e fato no banco PostgreSQL configurado
+
+---
+
+### Alternativa: Execução via Docker
+
+Se preferir rodar em container sem configurar o ambiente Python localmente:
+
+```bash
+# Construir a imagem
+docker build -t ellas-etl .
+
+# Executar passando as variáveis de ambiente
+docker run --env-file .env ellas-etl
+```
+
+---
 
 ## Diagrama do Projeto & Wireframe Interativo
 

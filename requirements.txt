@@ -1,4 +1,6 @@
 et_xmlfile==2.0.0
+msal==1.31.1
+requests==2.32.3
 greenlet==3.5.0
 numpy==2.4.4
 openpyxl==3.1.5
